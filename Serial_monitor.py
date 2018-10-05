@@ -6,7 +6,7 @@ import serial
 import serial.tools.list_ports
 serial_port =  serial.Serial()
 
-class Serial_Thread(QtCore.QThread):
+class Serial_RX(QtCore.QThread):
     Serial_signal = pyqtSignal()
     serial_display = ''
     def __init__(self,):
@@ -28,9 +28,25 @@ class Serial_Thread(QtCore.QThread):
                             self.Serial_signal.emit()
                 except:
                     print('read error')
+class Serial_TX(QtCore.QThread):
+    data_to_send = ''
+    def __init__(self,data_to_send):
+        QtCore.QThread.__init__(self)
+        self.data_to_send = data_to_send
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        try:
+            serial_port.write(self.data_to_send.encode())
+        except:
+            print('send error')
 
 
-class Wind(QWidget):
+
+
+class main_window(QWidget):
     def __init__(self):
         super().__init__()
         self.setupUI()
@@ -67,7 +83,7 @@ class Wind(QWidget):
 
     def serial_log_update(self):
         #print('serial_log_update')
-        self.Serial_log.setText(self.Serial_Thread.serial_display)
+        self.Serial_log.setText(self.Serial_RX_Thread.serial_display)
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
     def connection_update(self):
         if serial_port.is_open:
@@ -77,14 +93,28 @@ class Wind(QWidget):
             self.Port_select.setEnabled(False)
             self.port_refresh_button.setEnabled(False)
             self.Buad_select.setEnabled(False)
+            self.send_button.setEnabled(True)
         else:
             self.connect_button.setEnabled(True)
             self.disconnect_button.setEnabled(False)
             self.Port_select.setEnabled(True)
             self.port_refresh_button.setEnabled(True)
             self.Buad_select.setEnabled(True)
+            self.send_button.setEnabled(False)
+    def serial_send(self):
+        data_to_send = self.text_for_send.text()
+        if self.CR.isChecked():
+            data_to_send += '\r'
+        if self.NL.isChecked():
+            data_to_send += '\n'
+        self.Serial_TX_Thread = Serial_TX(data_to_send)
+        self.Serial_TX_Thread.start()
+        print('send : ' + data_to_send)
+
+        self.text_for_send.setText('')
+        pass
     def setupUI(self):
-        self.setGeometry(300,300, 300,500)
+        self.setGeometry(300,300, 500,700)
         self.show()
 
         Vlayout = QVBoxLayout(self)
@@ -100,7 +130,7 @@ class Wind(QWidget):
         self.connect_button = QPushButton('Connect', self)
         self.connect_button.clicked.connect(self.serial_connect)
         self.disconnect_button = QPushButton('Disconnect', self)
-        self.disconnect_button.setEnabled(False)
+        #self.disconnect_button.setEnabled(False)
         self.disconnect_button.clicked.connect(self.serial_disconnect)
 
         self.Port_select = QComboBox()
@@ -110,6 +140,7 @@ class Wind(QWidget):
 
         self.Buad_select.addItems(['300', '600', '1200', '2400', '4800', '9600', '14400', '19200', '28800', '38400', '57600', '115200'])
         self.Buad_select.setCurrentIndex(5)
+        H_Spacer1 = QSpacerItem(150, 10, QSizePolicy.Expanding)
         Hlayout_0.addWidget(l1)
         Hlayout_0.addWidget(self.Port_select)
         Hlayout_0.addWidget(self.port_refresh_button)
@@ -117,6 +148,7 @@ class Wind(QWidget):
         Hlayout_0.addWidget(self.Buad_select)
         Hlayout_0.addWidget(self.connect_button)
         Hlayout_0.addWidget(self.disconnect_button)
+        Hlayout_0.addItem(H_Spacer1)
         Vlayout.addLayout(Hlayout_0)
         ################################
 
@@ -128,39 +160,42 @@ class Wind(QWidget):
 
         ################################
         Hlayout_1 = QHBoxLayout(self)
-        text_for_send = QLineEdit()
-        send_button = QPushButton('Send', self)
-        Hlayout_1.addWidget(text_for_send)
-        Hlayout_1.addWidget(send_button)
+        self.text_for_send = QLineEdit()
+        self.send_button = QPushButton('Send', self)
+        self.send_button.clicked.connect(self.serial_send)
+        Hlayout_1.addWidget(self.text_for_send)
+        Hlayout_1.addWidget(self.send_button)
         Vlayout.addLayout(Hlayout_1)
 
         ################################
         Hlayout_2 = QHBoxLayout(self)
         l3 = QLabel()
         l3.setText('Line ending')
-        CR = QCheckBox("<CR>")
-        NL = QCheckBox("<NL>")
-        H_Spacer = QSpacerItem(150, 10, QSizePolicy.Expanding)
+        self.CR = QCheckBox("<CR>")
+        self.NL = QCheckBox("<NL>")
+        H_Spacer2 = QSpacerItem(150, 10, QSizePolicy.Expanding)
 
 
         Hlayout_2.addWidget(l3)
-        Hlayout_2.addWidget(CR)
-        Hlayout_2.addWidget(NL)
-        Hlayout_2.addItem(H_Spacer)
+        Hlayout_2.addWidget(self.CR)
+        Hlayout_2.addWidget(self.NL)
+        Hlayout_2.addItem(H_Spacer2)
         Vlayout.addLayout(Hlayout_2)
         ################################
-        self.Serial_Thread = Serial_Thread()
-        #self.connect(self.workThread, QtCore.SIGNAL("update(QString)"), self.add)
-        self.Serial_Thread.start()
-        self.Serial_Thread.Serial_signal.connect(self.serial_log_update)
-
+        self.Serial_RX_Thread = Serial_RX()
+        self.Serial_RX_Thread.start()
+        self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
+        self.connection_update()
 
 def main():
 
     app = QApplication(sys.argv)
-    w = Wind()
+    w = main_window()
+    width = w.frameGeometry().width()
+    height = w.frameGeometry().height()
 
     exit(app.exec_())
+
 
 
 if __name__ == '__main__':
