@@ -9,7 +9,8 @@ serial_port =  serial.Serial()
 class Serial_RX(QtCore.QThread):
     Serial_signal = pyqtSignal()
     serial_display = ''
-    def __init__(self,):
+    mode = 'ASCII'
+    def __init__(self):
         QtCore.QThread.__init__(self)
 
     def __del__(self):
@@ -23,8 +24,11 @@ class Serial_RX(QtCore.QThread):
 
                             bytesToRead = serial_port.inWaiting()
                             data = serial_port.read(bytesToRead)
-                            self.serial_display = self.serial_display + data.decode("utf-8")
-                            #print(data.decode("utf-8") )
+                            if(self.mode == 'ASCII'):
+                                self.serial_display = self.serial_display + data.decode("utf-8")
+                            elif(self.mode == 'HEX'):
+                                self.serial_display = self.serial_display + ' ['+data.hex()+'] '
+
                             self.Serial_signal.emit()
                 except:
                     print('read error')
@@ -55,7 +59,6 @@ class main_window(QWidget):
         for i in serial.tools.list_ports.comports(include_links=False):
             port_list.append(i.device)
         return port_list
-
     def update_port_list(self):
         print('update_port_list')
         self.Port_select.clear()
@@ -75,19 +78,19 @@ class main_window(QWidget):
             return
         self.connection_update()
         print('Connected')
-
     def serial_disconnect(self):
         serial_port.close()
         self.connection_update()
         print('Disconnected')
-
-
     def serial_log_update(self):
         #print('serial_log_update')
         self.Serial_log.setText(self.Serial_RX_Thread.serial_display)
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
+    def serial_log_clear(self):
+        self.Serial_RX_Thread.serial_display = ''
+        self.serial_log_update()
     def connection_update(self):
-        if serial_port.is_open:
+        if serial_port.is_open:#connected
             self.connect_button.setEnabled(False)
             self.disconnect_button.setEnabled(True)
 
@@ -95,6 +98,8 @@ class main_window(QWidget):
             self.port_refresh_button.setEnabled(False)
             self.Buad_select.setEnabled(False)
             self.send_button.setEnabled(True)
+            self.ASCII_mode.setEnabled(False)
+            self.HEX_mode.setEnabled(False)
         else:
             self.connect_button.setEnabled(True)
             self.disconnect_button.setEnabled(False)
@@ -102,6 +107,8 @@ class main_window(QWidget):
             self.port_refresh_button.setEnabled(True)
             self.Buad_select.setEnabled(True)
             self.send_button.setEnabled(False)
+            self.ASCII_mode.setEnabled(True)
+            self.HEX_mode.setEnabled(True)
     def serial_send(self):
         data_to_send = self.text_for_send.text()
         if self.CR.isChecked():
@@ -123,15 +130,9 @@ class main_window(QWidget):
 
         serial_error_msg.setStandardButtons(QMessageBox.Ok )
         serial_error_msg.exec_()
-
-    def setupUI(self):
-        self.setGeometry(300,300, 500,700)
-        self.setWindowTitle("Serial Monitor")
-        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
-
-        Vlayout = QVBoxLayout(self)
-        ################################
-        Hlayout_0 = QHBoxLayout(self)
+    def serial_setting_groupBox(self):
+        serial_setting = QGroupBox('Serial port setting')
+        Hlayout = QHBoxLayout(self)
         l1 = QLabel()
         l1.setText('Port')
         l2 = QLabel()
@@ -142,7 +143,7 @@ class main_window(QWidget):
         self.connect_button = QPushButton('Connect', self)
         self.connect_button.clicked.connect(self.serial_connect)
         self.disconnect_button = QPushButton('Disconnect', self)
-        #self.disconnect_button.setEnabled(False)
+        # self.disconnect_button.setEnabled(False)
         self.disconnect_button.clicked.connect(self.serial_disconnect)
 
         self.Port_select = QComboBox()
@@ -150,24 +151,65 @@ class main_window(QWidget):
 
         self.Buad_select = QComboBox()
 
-        self.Buad_select.addItems(['300', '600', '1200', '2400', '4800', '9600', '14400', '19200', '28800', '38400', '57600', '115200'])
+        self.Buad_select.addItems(
+            ['300', '600', '1200', '2400', '4800', '9600', '14400', '19200', '28800', '38400', '57600', '115200'])
         self.Buad_select.setCurrentIndex(5)
         H_Spacer1 = QSpacerItem(150, 10, QSizePolicy.Expanding)
-        Hlayout_0.addWidget(l1)
-        Hlayout_0.addWidget(self.Port_select)
-        Hlayout_0.addWidget(self.port_refresh_button)
-        Hlayout_0.addWidget(l2)
-        Hlayout_0.addWidget(self.Buad_select)
-        Hlayout_0.addWidget(self.connect_button)
-        Hlayout_0.addWidget(self.disconnect_button)
-        Hlayout_0.addItem(H_Spacer1)
-        Vlayout.addLayout(Hlayout_0)
+        Hlayout.addWidget(l1)
+        Hlayout.addWidget(self.Port_select)
+        Hlayout.addWidget(self.port_refresh_button)
+        Hlayout.addWidget(l2)
+        Hlayout.addWidget(self.Buad_select)
+        Hlayout.addWidget(self.connect_button)
+        Hlayout.addWidget(self.disconnect_button)
+        Hlayout.addItem(H_Spacer1)
+        # Vlayout.addLayout(Hlayout_0)
+        serial_setting.setLayout(Hlayout)
+        return serial_setting
+    def update_display_mode(self,btn):
+        print('update display_mode to '+btn.text())
+        print()
+        self.Serial_RX_Thread.mode = btn.text()
+    def log_display_setting_groupBox(self):
+        log_display_setting = QGroupBox('Display setting')
+        Hlayout = QHBoxLayout(self)
+        l1 = QLabel()
+        l1.setText('Display mode')
+        self.ASCII_mode = QRadioButton("ASCII")
+        self.ASCII_mode.setChecked(True)
+        self.ASCII_mode.clicked.connect(lambda:self.update_display_mode(self.ASCII_mode))
+        self.HEX_mode = QRadioButton("HEX")
+        self.HEX_mode.clicked.connect(lambda:self.update_display_mode(self.HEX_mode))
+        clear_log_button = QPushButton('Clear', self)
+        clear_log_button.clicked.connect(self.serial_log_clear)
+        H_Spacer = QSpacerItem(150, 10, QSizePolicy.Expanding)
+        Hlayout.addWidget(l1)
+        Hlayout.addWidget(self.ASCII_mode)
+        Hlayout.addWidget(self.HEX_mode)
+        Hlayout.addWidget(clear_log_button)
+        Hlayout.addItem(H_Spacer)
+        log_display_setting.setLayout(Hlayout)
+        return log_display_setting
+    def setupUI(self):
+        self.setGeometry(300,300, 500,700)
+        self.setWindowTitle("Serial Monitor")
+        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
+
+        self.Serial_RX_Thread = Serial_RX()
+        self.Serial_RX_Thread.start()
+        self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
+
+        Vlayout = QVBoxLayout(self)
         ################################
+
+        Vlayout.addWidget(self.serial_setting_groupBox())
+
+        ################################
+        Vlayout.addWidget(self.log_display_setting_groupBox())
+
 
         self.Serial_log = QTextEdit()
         self.Serial_log.setReadOnly(True)
-
-
         Vlayout.addWidget(self.Serial_log)
 
         ################################
@@ -194,9 +236,7 @@ class main_window(QWidget):
         Hlayout_2.addItem(H_Spacer2)
         Vlayout.addLayout(Hlayout_2)
         ################################
-        self.Serial_RX_Thread = Serial_RX()
-        self.Serial_RX_Thread.start()
-        self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
+
         self.connection_update()
 
         self.show()
