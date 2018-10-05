@@ -4,32 +4,43 @@ from PyQt5.QtCore import pyqtSignal
 import sys
 import serial
 import serial.tools.list_ports
+import  time
+
 serial_port =  serial.Serial()
 
 class Serial_RX(QtCore.QThread):
     Serial_signal = pyqtSignal()
     serial_display = ''
     mode = 'ASCII'
+    timer = time.clock()
     def __init__(self):
         QtCore.QThread.__init__(self)
 
-    def __del__(self):
-        self.wait()
+    #def __del__(self):
+        #self.wait()
 
     def run(self):
+        #self.
         while True:
+
             if serial_port.is_open:
                 try:
                     if serial_port.inWaiting()>0:
+                        delta_time = (time.clock() - self.timer)
+                        self.timer = time.clock()
+                        #print(delta_time)
+                        bytesToRead = serial_port.inWaiting()
+                        data = serial_port.read(bytesToRead)
 
-                            bytesToRead = serial_port.inWaiting()
-                            data = serial_port.read(bytesToRead)
-                            if(self.mode == 'ASCII'):
-                                self.serial_display = self.serial_display + data.decode("utf-8")
-                            elif(self.mode == 'HEX'):
-                                self.serial_display = self.serial_display + ' ['+data.hex()+'] '
+                        if(self.mode == 'ASCII'):
+                            self.serial_display += data.decode("utf-8")
+                        elif(self.mode == 'HEX'):
+                            for b in data.hex():
+                                self.serial_display +=  + ' ['+b+'] '
+                        self.Serial_signal.emit()
+                        print(len( self.serial_display))
+                        #time.delay(10)
 
-                            self.Serial_signal.emit()
                 except:
                     print('read error')
 class Serial_TX(QtCore.QThread):
@@ -38,8 +49,8 @@ class Serial_TX(QtCore.QThread):
         QtCore.QThread.__init__(self)
         self.data_to_send = data_to_send
 
-    def __del__(self):
-        self.wait()
+    #def __del__(self):
+        #self.wait()
 
     def run(self):
         try:
@@ -83,8 +94,7 @@ class main_window(QWidget):
         self.connection_update()
         print('Disconnected')
     def serial_log_update(self):
-        #print('serial_log_update')
-        self.Serial_log.setText(self.Serial_RX_Thread.serial_display)
+        self.Serial_log.setPlainText(self.Serial_RX_Thread.serial_display)
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
     def serial_log_clear(self):
         self.Serial_RX_Thread.serial_display = ''
@@ -168,7 +178,6 @@ class main_window(QWidget):
         return serial_setting
     def update_display_mode(self,btn):
         print('update display_mode to '+btn.text())
-        print()
         self.Serial_RX_Thread.mode = btn.text()
     def log_display_setting_groupBox(self):
         log_display_setting = QGroupBox('Display setting')
@@ -208,8 +217,11 @@ class main_window(QWidget):
         Vlayout.addWidget(self.log_display_setting_groupBox())
 
 
-        self.Serial_log = QTextEdit()
+
+        self.Serial_log = QPlainTextEdit()
+
         self.Serial_log.setReadOnly(True)
+
         Vlayout.addWidget(self.Serial_log)
 
         ################################
