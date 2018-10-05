@@ -31,14 +31,14 @@ class Serial_RX(QtCore.QThread):
                         #print(delta_time)
                         bytesToRead = serial_port.inWaiting()
                         data = serial_port.read(bytesToRead)
-
+                        self.serial_display = ''
                         if(self.mode == 'ASCII'):
                             self.serial_display += data.decode("utf-8")
                         elif(self.mode == 'HEX'):
                             for b in data.hex():
                                 self.serial_display +=  + ' ['+b+'] '
                         self.Serial_signal.emit()
-                        print(len( self.serial_display))
+
                         #time.delay(10)
 
                 except:
@@ -94,11 +94,11 @@ class main_window(QWidget):
         self.connection_update()
         print('Disconnected')
     def serial_log_update(self):
-        self.Serial_log.setPlainText(self.Serial_RX_Thread.serial_display)
+        self.Serial_log.insertPlainText(self.Serial_RX_Thread.serial_display)
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
     def serial_log_clear(self):
-        self.Serial_RX_Thread.serial_display = ''
-        self.serial_log_update()
+        self.Serial_log.setPlainText('')
+
     def connection_update(self):
         if serial_port.is_open:#connected
             self.connect_button.setEnabled(False)
