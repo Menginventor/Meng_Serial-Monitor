@@ -71,6 +71,7 @@ class main_window(QWidget):
             serial_port.open()
         except:
             print('Serial error')
+            self.serial_error_dialog()
             return
         self.connection_update()
         print('Connected')
@@ -113,9 +114,20 @@ class main_window(QWidget):
 
         self.text_for_send.setText('')
         pass
+    def serial_error_dialog(self):
+        serial_error_msg = QMessageBox()
+        serial_error_msg.setIcon(QMessageBox.Warning)
+        serial_error_msg.setText("Error openning serial port "+serial_port.port)
+        #serial_error_msg.setInformativeText("This is additional information")
+        serial_error_msg.setWindowTitle("Warning message")
+
+        serial_error_msg.setStandardButtons(QMessageBox.Ok )
+        serial_error_msg.exec_()
+
     def setupUI(self):
         self.setGeometry(300,300, 500,700)
-        self.show()
+        self.setWindowTitle("Serial Monitor")
+        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
 
         Vlayout = QVBoxLayout(self)
         ################################
@@ -186,6 +198,8 @@ class main_window(QWidget):
         self.Serial_RX_Thread.start()
         self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
         self.connection_update()
+
+        self.show()
 
 def main():
 
