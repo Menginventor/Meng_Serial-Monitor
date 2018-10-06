@@ -61,9 +61,9 @@ class Serial_TX(QtCore.QThread):
 
 
 
-class main_window(QWidget):
-    def __init__(self):
-        super().__init__()
+class main_widget(QWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
         self.setupUI()
     def get_port_list(self):
         port_list = []
@@ -200,9 +200,7 @@ class main_window(QWidget):
         log_display_setting.setLayout(Hlayout)
         return log_display_setting
     def setupUI(self):
-        self.setGeometry(300,300, 500,700)
-        self.setWindowTitle("Serial Monitor")
-        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
+
 
         self.Serial_RX_Thread = Serial_RX()
         self.Serial_RX_Thread.start()
@@ -248,15 +246,26 @@ class main_window(QWidget):
         Hlayout_2.addItem(H_Spacer2)
         Vlayout.addLayout(Hlayout_2)
         ################################
-
         self.connection_update()
+        self.setLayout(Vlayout)
 
-        self.show()
 
+class main_window(QMainWindow):
+    def __init__(self):
+        super(QMainWindow, self).__init__()
+        #QMainWindow.__init__(self)
+        self.initUI()
+    def initUI(self):
+        self.setGeometry(300, 300, 450, 600)
+        self.setWindowTitle("Serial Monitor")
+        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
+        self.main_widget = main_widget(self)
+        self.setCentralWidget( self.main_widget)
 def main():
 
     app = QApplication(sys.argv)
     w = main_window()
+    w.show()
     width = w.frameGeometry().width()
     height = w.frameGeometry().height()
 
