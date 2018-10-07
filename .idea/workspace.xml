@@ -14,31 +14,36 @@
       <file leaf-file-name="Serial_monitor.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Serial_monitor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="637">
-              <caret line="232" column="37" lean-forward="false" selection-start-line="232" selection-start-column="37" selection-end-line="232" selection-end-column="37" />
+            <state relative-caret-position="120">
+              <caret line="19" column="22" lean-forward="false" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
-                <element signature="e#385#1587#0" expanded="false" />
-                <element signature="e#1625#1939#0" expanded="false" />
-                <element signature="e#2076#2156#0" expanded="false" />
-                <element signature="e#2194#2344#0" expanded="false" />
-                <element signature="e#2385#2533#0" expanded="false" />
-                <element signature="e#2573#3115#0" expanded="false" />
-                <element signature="e#3157#3239#0" expanded="false" />
-                <element signature="e#3281#3450#0" expanded="false" />
-                <element signature="e#3491#3523#0" expanded="false" />
-                <element signature="e#3565#4383#0" expanded="false" />
-                <element signature="e#4419#4776#0" expanded="false" />
-                <element signature="e#4820#5220#0" expanded="false" />
-                <element signature="e#5268#7153#0" expanded="false" />
-                <element signature="e#7201#7292#0" expanded="false" />
-                <element signature="e#11532#12961#0" expanded="false" />
+                <element signature="e#2812#3126#0" expanded="false" />
+                <element signature="e#3263#3343#0" expanded="false" />
+                <element signature="e#3381#3531#0" expanded="false" />
+                <element signature="e#3572#3720#0" expanded="false" />
+                <element signature="e#3760#4302#0" expanded="false" />
+                <element signature="e#4344#4426#0" expanded="false" />
+                <element signature="e#4468#4637#0" expanded="false" />
+                <element signature="e#4678#4710#0" expanded="false" />
+                <element signature="e#4752#5377#0" expanded="false" />
+                <element signature="e#5415#5772#0" expanded="false" />
+                <element signature="e#5816#6216#0" expanded="false" />
+                <element signature="e#6264#8149#0" expanded="false" />
+                <element signature="e#12333#13762#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -53,6 +58,7 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/Serial_monitor.py" />
       </list>
     </option>
@@ -122,9 +128,31 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
     </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Meng_Serial-Monitor" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="Python.Serial_monitor" />
+      <item index="1" class="java.lang.String" itemvalue="Python.test" />
+    </list>
     <recent_temporary>
-      <list size="1">
+      <list size="2">
         <item index="0" class="java.lang.String" itemvalue="Python.Serial_monitor" />
+        <item index="1" class="java.lang.String" itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -170,7 +198,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="3" />
+      <option name="time" value="8" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -183,27 +211,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="50">
+          <caret line="2" column="1" lean-forward="false" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Serial_monitor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="637">
-          <caret line="232" column="37" lean-forward="false" selection-start-line="232" selection-start-column="37" selection-end-line="232" selection-end-column="37" />
+        <state relative-caret-position="120">
+          <caret line="19" column="22" lean-forward="false" selection-start-line="19" selection-start-column="22" selection-end-line="19" selection-end-column="22" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#385#1587#0" expanded="false" />
-            <element signature="e#1625#1939#0" expanded="false" />
-            <element signature="e#2076#2156#0" expanded="false" />
-            <element signature="e#2194#2344#0" expanded="false" />
-            <element signature="e#2385#2533#0" expanded="false" />
-            <element signature="e#2573#3115#0" expanded="false" />
-            <element signature="e#3157#3239#0" expanded="false" />
-            <element signature="e#3281#3450#0" expanded="false" />
-            <element signature="e#3491#3523#0" expanded="false" />
-            <element signature="e#3565#4383#0" expanded="false" />
-            <element signature="e#4419#4776#0" expanded="false" />
-            <element signature="e#4820#5220#0" expanded="false" />
-            <element signature="e#5268#7153#0" expanded="false" />
-            <element signature="e#7201#7292#0" expanded="false" />
-            <element signature="e#11532#12961#0" expanded="false" />
+            <element signature="e#2812#3126#0" expanded="false" />
+            <element signature="e#3263#3343#0" expanded="false" />
+            <element signature="e#3381#3531#0" expanded="false" />
+            <element signature="e#3572#3720#0" expanded="false" />
+            <element signature="e#3760#4302#0" expanded="false" />
+            <element signature="e#4344#4426#0" expanded="false" />
+            <element signature="e#4468#4637#0" expanded="false" />
+            <element signature="e#4678#4710#0" expanded="false" />
+            <element signature="e#4752#5377#0" expanded="false" />
+            <element signature="e#5415#5772#0" expanded="false" />
+            <element signature="e#5816#6216#0" expanded="false" />
+            <element signature="e#6264#8149#0" expanded="false" />
+            <element signature="e#12333#13762#0" expanded="false" />
           </folding>
         </state>
       </provider>

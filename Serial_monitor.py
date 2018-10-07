@@ -17,34 +17,54 @@ serial_port =  serial.Serial()
 class Serial_RX(QtCore.QThread):
     Serial_signal = pyqtSignal()
     serial_display = ''
-    mode = 'ASCII'
+    serial_buffer = ''
     timer = time.clock()
-    def __init__(self):
+    def __init__(self,parent):
         QtCore.QThread.__init__(self)
+        self.parent = parent
     def __del__(self):
         self.wait()
     def run(self):
         while True:
+
+
             if serial_port.is_open:
                 try:
-                    if serial_port.inWaiting()>0:
-                        delta_time = (time.clock() - self.timer)
-                        self.timer = time.clock()
-                        #print(delta_time)
-                        bytesToRead = serial_port.inWaiting()
-                        data = serial_port.read(bytesToRead)
-                        self.serial_display = ''
+                    if self.parent.Scope_Enable_chk.isChecked():
+                        if self.parent.CSV_mode.isChecked():
+                            self.serial_buffer = serial_port.readline().decode("utf-8")
+                            preprocess_str = self.serial_buffer
+                            preprocess_str = preprocess_str.replace('\r','')
+                            preprocess_str = preprocess_str.replace('\n', '')
+                            separate_str = preprocess_str.split(',')
+                            separate_val = [float(i) for i in separate_str]
+                            print(separate_val)
+                            self.serial_display = self.serial_buffer
+                            self.Serial_signal.emit()
+                        elif self.parent.Protocol_mode.isChecked():
+                            pass
+                    else:
+                        if serial_port.inWaiting()>0:
 
-                        if(self.mode == 'ASCII'):
-                            self.serial_display += data.decode("utf-8")
+                            #print(delta_time)
+                            bytesToRead = serial_port.inWaiting()
+                            data = serial_port.read(bytesToRead)
+                            self.serial_buffer = ''
 
-                        elif(self.mode == 'HEX'):
-                            if delta_time> 0.025:
-                                self.serial_display += '\r\n'
-                            for b in data:
-                                self.serial_display +=  ' '+format(b, '02x')+' '
+                            #if self.mode == 'ASCII':
+                            if self.parent.ASCII_mode.isChecked():
+                                self.serial_buffer += data.decode("utf-8")
 
-                        self.Serial_signal.emit()
+                            #elif(self.mode == 'HEX'):
+                            elif  self.parent.HEX_mode.isChecked():
+                                delta_time = (time.clock() - self.timer)
+                                self.timer = time.clock()
+                                if delta_time> 0.025:
+                                    self.serial_buffer += '\r\n'
+                                for b in data:
+                                    self.serial_buffer +=  ' '+format(b, '02x')+' '
+                            self.serial_display = self.serial_buffer
+                            self.Serial_signal.emit()
                 except:
                     print('read error')
 class Serial_TX(QtCore.QThread):
@@ -103,25 +123,20 @@ class main_widget(QWidget):
     def serial_log_clear(self):
         self.Serial_log.setPlainText('')
     def connection_update(self):
-        if serial_port.is_open:#connected
-            self.connect_button.setEnabled(False)
-            self.disconnect_button.setEnabled(True)
+        Serial_Open = serial_port.is_open
+        self.send_button.setEnabled(Serial_Open)
+        self.disconnect_button.setEnabled(Serial_Open)
+        self.connect_button.setEnabled(not Serial_Open)
+        self.Port_select.setEnabled(not Serial_Open)
+        self.port_refresh_button.setEnabled(not Serial_Open)
+        self.Buad_select.setEnabled(not Serial_Open)
+        self.ASCII_mode.setEnabled(not Serial_Open)
+        self.HEX_mode.setEnabled(not Serial_Open)
+        self.Scope_Enable_chk.setEnabled(not Serial_Open)
+        self.CSV_mode.setEnabled(not Serial_Open)
+        self.Protocol_mode.setEnabled(not Serial_Open)
 
-            self.Port_select.setEnabled(False)
-            self.port_refresh_button.setEnabled(False)
-            self.Buad_select.setEnabled(False)
-            self.send_button.setEnabled(True)
-            self.ASCII_mode.setEnabled(False)
-            self.HEX_mode.setEnabled(False)
-        else:
-            self.connect_button.setEnabled(True)
-            self.disconnect_button.setEnabled(False)
-            self.Port_select.setEnabled(True)
-            self.port_refresh_button.setEnabled(True)
-            self.Buad_select.setEnabled(True)
-            self.send_button.setEnabled(False)
-            self.ASCII_mode.setEnabled(True)
-            self.HEX_mode.setEnabled(True)
+
     def serial_send(self):
         data_to_send = self.text_for_send.text()
         if self.CR.isChecked():
@@ -187,9 +202,7 @@ class main_widget(QWidget):
         # Vlayout.addLayout(Hlayout_0)
         serial_setting.setLayout(Hlayout)
         return serial_setting
-    def update_display_mode(self,btn):
-        print('update display_mode to '+btn.text())
-        self.Serial_RX_Thread.mode = btn.text()
+
     def Scope_Enable_update(self):
         if self.Scope_Enable_chk.isChecked():
             self.Display_settings_Taps_Widget.setTabEnabled(1,True)
@@ -208,9 +221,7 @@ class main_widget(QWidget):
         Display_Mode_Label.setText('Display Mode')
         self.ASCII_mode = QRadioButton("ASCII")
         self.ASCII_mode.setChecked(True)
-        self.ASCII_mode.clicked.connect(lambda:self.update_display_mode(self.ASCII_mode))
         self.HEX_mode = QRadioButton("HEX")
-        self.HEX_mode.clicked.connect(lambda:self.update_display_mode(self.HEX_mode))
         clear_log_button = QPushButton('Clear', self)
         clear_log_button.clicked.connect(self.serial_log_clear)
         self.Scope_Enable_chk = QCheckBox("Scope Enable")
@@ -232,9 +243,11 @@ class main_widget(QWidget):
         self.CSV_mode = QRadioButton("CSV")
         self.CSV_mode.setChecked(True)
         self.Protocol_mode = QRadioButton("Protocol")
+        H_Spacer2 = QSpacerItem(10, 10, QSizePolicy.Expanding)
         Scope_Settings_Hlayout.addWidget(Data_Format_Label)
         Scope_Settings_Hlayout.addWidget(self.CSV_mode)
         Scope_Settings_Hlayout.addWidget(self.Protocol_mode)
+        Scope_Settings_Hlayout.addItem(H_Spacer2)
         Scope_settings_tab.setLayout(Scope_Settings_Hlayout)
         ############################################################################
         self.Display_settings_Taps_Widget.setFixedHeight(75)
@@ -242,9 +255,7 @@ class main_widget(QWidget):
         return self.Display_settings_Taps_Widget
 
     def setupUI(self):
-        self.Serial_RX_Thread = Serial_RX()
-        self.Serial_RX_Thread.start()
-        self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
+
         Vlayout = QVBoxLayout(self)
         ################################
 
@@ -286,6 +297,10 @@ class main_widget(QWidget):
         self.connection_update()
         self.setLayout(Vlayout)
         self.Scope_Enable_update()
+
+        self.Serial_RX_Thread = Serial_RX(self)
+        self.Serial_RX_Thread.start()
+        self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
 class main_window(QMainWindow):
     def __init__(self,settings ):
         self.settings = settings
