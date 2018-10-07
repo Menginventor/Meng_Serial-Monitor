@@ -15,14 +15,10 @@ class Serial_RX(QtCore.QThread):
     timer = time.clock()
     def __init__(self):
         QtCore.QThread.__init__(self)
-
-    #def __del__(self):
-        #self.wait()
-
+    def __del__(self):
+        self.wait()
     def run(self):
-        #self.
         while True:
-
             if serial_port.is_open:
                 try:
                     if serial_port.inWaiting()>0:
@@ -32,15 +28,17 @@ class Serial_RX(QtCore.QThread):
                         bytesToRead = serial_port.inWaiting()
                         data = serial_port.read(bytesToRead)
                         self.serial_display = ''
+
                         if(self.mode == 'ASCII'):
                             self.serial_display += data.decode("utf-8")
+
                         elif(self.mode == 'HEX'):
-                            for b in data.hex():
-                                self.serial_display +=  + ' ['+b+'] '
+                            if delta_time> 0.025:
+                                self.serial_display += '\r\n'
+                            for b in data:
+                                self.serial_display +=  ' '+format(b, '02x')+' '
+
                         self.Serial_signal.emit()
-
-                        #time.delay(10)
-
                 except:
                     print('read error')
 class Serial_TX(QtCore.QThread):
@@ -48,19 +46,13 @@ class Serial_TX(QtCore.QThread):
     def __init__(self,data_to_send):
         QtCore.QThread.__init__(self)
         self.data_to_send = data_to_send
-
-    #def __del__(self):
-        #self.wait()
-
+    def __del__(self):
+        self.wait()
     def run(self):
         try:
             serial_port.write(self.data_to_send.encode())
         except:
             print('send error')
-
-
-
-
 class main_widget(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
@@ -89,6 +81,7 @@ class main_widget(QWidget):
             return
         self.connection_update()
         print('Connected')
+        self.serial_log_clear()
     def serial_disconnect(self):
         serial_port.close()
         self.connection_update()
@@ -98,7 +91,6 @@ class main_widget(QWidget):
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
     def serial_log_clear(self):
         self.Serial_log.setPlainText('')
-
     def connection_update(self):
         if serial_port.is_open:#connected
             self.connect_button.setEnabled(False)
@@ -200,12 +192,9 @@ class main_widget(QWidget):
         log_display_setting.setLayout(Hlayout)
         return log_display_setting
     def setupUI(self):
-
-
         self.Serial_RX_Thread = Serial_RX()
         self.Serial_RX_Thread.start()
         self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
-
         Vlayout = QVBoxLayout(self)
         ################################
 
@@ -248,19 +237,43 @@ class main_widget(QWidget):
         ################################
         self.connection_update()
         self.setLayout(Vlayout)
-
-
 class main_window(QMainWindow):
     def __init__(self):
         super(QMainWindow, self).__init__()
         #QMainWindow.__init__(self)
         self.initUI()
     def initUI(self):
-        self.setGeometry(300, 300, 450, 600)
+        self.setGeometry(300, 300, 500, 600)
         self.setWindowTitle("Serial Monitor")
         self.setWindowIcon(QtGui.QIcon('py_logo.png'))
+        mainMenu = self.menuBar()
+        fileMenu = mainMenu.addMenu('File')
+        impMenu = QMenu('Import', self)
+        imp_txt_Act = QAction('Import text file', self)
+        imp_csv_Act = QAction('Import CSV file', self)
+        imp_byte_Act = QAction('Import Protocol file', self)
+        impMenu.addAction(imp_txt_Act)
+        impMenu.addAction(imp_csv_Act)
+        impMenu.addAction(imp_byte_Act)
+
+        expMenu = QMenu('Export', self)
+        exp_txt_Act = QAction('Export text file', self)
+        exp_csv_Act = QAction('Export CSV file', self)
+        exp_byte_Act = QAction('Export Protocol file', self)
+        expMenu.addAction(exp_txt_Act)
+        expMenu.addAction(exp_csv_Act)
+        expMenu.addAction(exp_byte_Act)
+
+        fileMenu.addMenu(impMenu)
+        fileMenu.addMenu(expMenu)
+
+        editMenu = mainMenu.addMenu('Edit')
+        viewMenu = mainMenu.addMenu('View')
+        toolsMenu = mainMenu.addMenu('Tools')
+        helpMenu = mainMenu.addMenu('Help')
         self.main_widget = main_widget(self)
         self.setCentralWidget( self.main_widget)
+
 def main():
 
     app = QApplication(sys.argv)
@@ -268,6 +281,7 @@ def main():
     w.show()
     width = w.frameGeometry().width()
     height = w.frameGeometry().height()
+    print(width,height)
 
     exit(app.exec_())
 
