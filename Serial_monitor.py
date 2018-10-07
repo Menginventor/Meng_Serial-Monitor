@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import QSettings
 import sys
 import serial
 import serial.tools.list_ports
@@ -54,7 +55,8 @@ class Serial_TX(QtCore.QThread):
         except:
             print('send error')
 class main_widget(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent,settings):
+        self.settings = settings
         super().__init__(parent)
         self.setupUI()
     def get_port_list(self):
@@ -82,6 +84,8 @@ class main_widget(QWidget):
         self.connection_update()
         print('Connected')
         self.serial_log_clear()
+        self.settings.setValue('last_connect_port', serial_port.port)
+        self.settings.setValue('last_connect_baud', str(serial_port.baudrate))
     def serial_disconnect(self):
         serial_port.close()
         self.connection_update()
@@ -149,13 +153,21 @@ class main_widget(QWidget):
         self.disconnect_button.clicked.connect(self.serial_disconnect)
 
         self.Port_select = QComboBox()
-        self.Port_select.addItems(self.get_port_list())
+        port_list = self.get_port_list()
+        self.Port_select.addItems(port_list)
+
+        last_connect_port = self.settings.value('last_connect_port', type=str)
+        if last_connect_port in port_list:
+            self.Port_select.setCurrentIndex(port_list.index(last_connect_port))
 
         self.Buad_select = QComboBox()
+        baud_list = ['300', '600', '1200', '2400', '4800', '9600', '14400', '19200', '28800', '38400', '57600', '115200']
+        self.Buad_select.addItems(baud_list)
+        last_connect_baud = self.settings.value('last_connect_baud', type=str)
+        if last_connect_baud in baud_list:
+            self.Buad_select.setCurrentIndex(baud_list.index(last_connect_baud))
 
-        self.Buad_select.addItems(
-            ['300', '600', '1200', '2400', '4800', '9600', '14400', '19200', '28800', '38400', '57600', '115200'])
-        self.Buad_select.setCurrentIndex(5)
+
         H_Spacer1 = QSpacerItem(150, 10, QSizePolicy.Expanding)
         Hlayout.addWidget(l1)
         Hlayout.addWidget(self.Port_select)
@@ -238,7 +250,10 @@ class main_widget(QWidget):
         self.connection_update()
         self.setLayout(Vlayout)
 class main_window(QMainWindow):
-    def __init__(self):
+    def __init__(self,settings ):
+        self.settings = settings
+
+
         super(QMainWindow, self).__init__()
         #QMainWindow.__init__(self)
         self.initUI()
@@ -271,18 +286,19 @@ class main_window(QMainWindow):
         viewMenu = mainMenu.addMenu('View')
         toolsMenu = mainMenu.addMenu('Tools')
         helpMenu = mainMenu.addMenu('Help')
-        self.main_widget = main_widget(self)
+        self.main_widget = main_widget(self,self.settings)
         self.setCentralWidget( self.main_widget)
+
 
 def main():
 
     app = QApplication(sys.argv)
-    w = main_window()
+    settings = QSettings('Meng\'s Lab', 'Serial Monitor')
+    w = main_window(settings)
     w.show()
-    width = w.frameGeometry().width()
-    height = w.frameGeometry().height()
-    print(width,height)
-
+    #width = w.frameGeometry().width()
+    #height = w.frameGeometry().height()
+    #print(width,height)
     exit(app.exec_())
 
 
