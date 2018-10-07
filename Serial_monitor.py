@@ -190,13 +190,22 @@ class main_widget(QWidget):
     def update_display_mode(self,btn):
         print('update display_mode to '+btn.text())
         self.Serial_RX_Thread.mode = btn.text()
+    def Scope_Enable_update(self):
+        if self.Scope_Enable_chk.isChecked():
+            self.Display_settings_Taps_Widget.setTabEnabled(1,True)
+        else:
+            self.Display_settings_Taps_Widget.setTabEnabled(1, False)
 
-    def log_display_setting_groupBox(self):
-        log_display_setting = QGroupBox('Display setting')
-   
-        Hlayout = QHBoxLayout(self)
-        l1 = QLabel()
-        l1.setText('Display mode')
+    def Display_settings_Taps(self):
+        self.Display_settings_Taps_Widget = QTabWidget()
+        Log_settings_tab = QWidget()
+        Scope_settings_tab = QWidget()
+        self.Display_settings_Taps_Widget.addTab(Log_settings_tab, "Log Settings")
+        self.Display_settings_Taps_Widget.addTab(Scope_settings_tab, "Scope Settings")
+        ############################################################################
+        Log_Settings_Hlayout = QHBoxLayout(self)
+        Display_Mode_Label = QLabel()
+        Display_Mode_Label.setText('Display Mode')
         self.ASCII_mode = QRadioButton("ASCII")
         self.ASCII_mode.setChecked(True)
         self.ASCII_mode.clicked.connect(lambda:self.update_display_mode(self.ASCII_mode))
@@ -204,15 +213,34 @@ class main_widget(QWidget):
         self.HEX_mode.clicked.connect(lambda:self.update_display_mode(self.HEX_mode))
         clear_log_button = QPushButton('Clear', self)
         clear_log_button.clicked.connect(self.serial_log_clear)
-        H_Spacer = QSpacerItem(150, 10, QSizePolicy.Expanding)
-        Hlayout.addWidget(l1)
-        Hlayout.addWidget(self.ASCII_mode)
-        Hlayout.addWidget(self.HEX_mode)
-        Hlayout.addWidget(clear_log_button)
-        Hlayout.addItem(H_Spacer)
-        log_display_setting.setLayout(Hlayout)
+        self.Scope_Enable_chk = QCheckBox("Scope Enable")
+        self.Scope_Enable_chk.clicked.connect(self.Scope_Enable_update)
+        H_Spacer = QSpacerItem(10, 10, QSizePolicy.Expanding)
+        mini_H_Spacer = QSpacerItem(50, 10)
+        Log_Settings_Hlayout.addWidget(Display_Mode_Label)
+        Log_Settings_Hlayout.addWidget(self.ASCII_mode)
+        Log_Settings_Hlayout.addWidget(self.HEX_mode)
+        Log_Settings_Hlayout.addWidget(clear_log_button)
+        Log_Settings_Hlayout.addItem(mini_H_Spacer)
+        Log_Settings_Hlayout.addWidget(self.Scope_Enable_chk)
+        Log_Settings_Hlayout.addItem(H_Spacer)
+        Log_settings_tab.setLayout(Log_Settings_Hlayout)
+        ############################################################################
+        Scope_Settings_Hlayout = QHBoxLayout(self)
+        Data_Format_Label = QLabel()
+        Data_Format_Label.setText('Data Format')
+        self.CSV_mode = QRadioButton("CSV")
+        self.CSV_mode.setChecked(True)
+        self.Protocol_mode = QRadioButton("Protocol")
+        Scope_Settings_Hlayout.addWidget(Data_Format_Label)
+        Scope_Settings_Hlayout.addWidget(self.CSV_mode)
+        Scope_Settings_Hlayout.addWidget(self.Protocol_mode)
+        Scope_settings_tab.setLayout(Scope_Settings_Hlayout)
+        ############################################################################
+        self.Display_settings_Taps_Widget.setFixedHeight(75)
 
-        return log_display_setting
+        return self.Display_settings_Taps_Widget
+
     def setupUI(self):
         self.Serial_RX_Thread = Serial_RX()
         self.Serial_RX_Thread.start()
@@ -223,9 +251,7 @@ class main_widget(QWidget):
         Vlayout.addWidget(self.serial_setting_groupBox())
 
         ################################
-        Vlayout.addWidget(self.log_display_setting_groupBox())
-
-
+        Vlayout.addWidget(self.Display_settings_Taps())
 
         self.Serial_log = QPlainTextEdit()
 
@@ -259,6 +285,7 @@ class main_widget(QWidget):
         ################################
         self.connection_update()
         self.setLayout(Vlayout)
+        self.Scope_Enable_update()
 class main_window(QMainWindow):
     def __init__(self,settings ):
         self.settings = settings
