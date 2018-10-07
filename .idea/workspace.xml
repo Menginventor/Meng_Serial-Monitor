@@ -14,21 +14,36 @@
       <file leaf-file-name="Serial_monitor.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Serial_monitor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="485">
-              <caret line="167" column="78" lean-forward="false" selection-start-line="167" selection-start-column="78" selection-end-line="167" selection-end-column="78" />
+            <state relative-caret-position="309">
+              <caret line="195" column="3" lean-forward="false" selection-start-line="195" selection-start-column="3" selection-end-line="195" selection-end-column="3" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
-                <element signature="e#272#1474#0" expanded="false" />
-                <element signature="e#1512#1826#0" expanded="false" />
-                <element signature="e#1904#1984#0" expanded="false" />
-                <element signature="e#2022#2172#0" expanded="false" />
-                <element signature="e#2213#2361#0" expanded="false" />
+                <element signature="e#385#1587#0" expanded="false" />
+                <element signature="e#1625#1939#0" expanded="false" />
+                <element signature="e#2076#2156#0" expanded="false" />
+                <element signature="e#2194#2344#0" expanded="false" />
+                <element signature="e#2385#2533#0" expanded="false" />
+                <element signature="e#2573#3115#0" expanded="false" />
+                <element signature="e#3157#3239#0" expanded="false" />
+                <element signature="e#3281#3450#0" expanded="false" />
+                <element signature="e#3491#3523#0" expanded="false" />
+                <element signature="e#3565#4383#0" expanded="false" />
+                <element signature="e#4419#4776#0" expanded="false" />
+                <element signature="e#4820#5220#0" expanded="false" />
+                <element signature="e#5268#7153#0" expanded="false" />
+                <element signature="e#7201#7292#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>updateplot</find>
+      <find>_interval</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -153,22 +168,39 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="2" />
+      <option name="time" value="3" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/pyqtgraph/graphicsItems/GraphicsWidget.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="350">
+          <caret line="16" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Serial_monitor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="485">
-          <caret line="167" column="78" lean-forward="false" selection-start-line="167" selection-start-column="78" selection-end-line="167" selection-end-column="78" />
+        <state relative-caret-position="309">
+          <caret line="195" column="3" lean-forward="false" selection-start-line="195" selection-start-column="3" selection-end-line="195" selection-end-column="3" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#272#1474#0" expanded="false" />
-            <element signature="e#1512#1826#0" expanded="false" />
-            <element signature="e#1904#1984#0" expanded="false" />
-            <element signature="e#2022#2172#0" expanded="false" />
-            <element signature="e#2213#2361#0" expanded="false" />
+            <element signature="e#385#1587#0" expanded="false" />
+            <element signature="e#1625#1939#0" expanded="false" />
+            <element signature="e#2076#2156#0" expanded="false" />
+            <element signature="e#2194#2344#0" expanded="false" />
+            <element signature="e#2385#2533#0" expanded="false" />
+            <element signature="e#2573#3115#0" expanded="false" />
+            <element signature="e#3157#3239#0" expanded="false" />
+            <element signature="e#3281#3450#0" expanded="false" />
+            <element signature="e#3491#3523#0" expanded="false" />
+            <element signature="e#3565#4383#0" expanded="false" />
+            <element signature="e#4419#4776#0" expanded="false" />
+            <element signature="e#4820#5220#0" expanded="false" />
+            <element signature="e#5268#7153#0" expanded="false" />
+            <element signature="e#7201#7292#0" expanded="false" />
           </folding>
         </state>
       </provider>

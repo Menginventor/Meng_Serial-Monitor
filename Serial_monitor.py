@@ -6,7 +6,12 @@ import sys
 import serial
 import serial.tools.list_ports
 import  time
-
+import pyqtgraph as pg
+import pyqtgraph.exporters
+import math
+import numpy as np
+import random
+import collections
 serial_port =  serial.Serial()
 
 class Serial_RX(QtCore.QThread):
@@ -55,6 +60,8 @@ class Serial_TX(QtCore.QThread):
         except:
             print('send error')
 class main_widget(QWidget):
+    x_plt_arr =  np.array([])
+    y_plt_arr = np.array([])
     def __init__(self, parent,settings):
         self.settings = settings
         super().__init__(parent)
@@ -183,8 +190,10 @@ class main_widget(QWidget):
     def update_display_mode(self,btn):
         print('update display_mode to '+btn.text())
         self.Serial_RX_Thread.mode = btn.text()
+
     def log_display_setting_groupBox(self):
         log_display_setting = QGroupBox('Display setting')
+   
         Hlayout = QHBoxLayout(self)
         l1 = QLabel()
         l1.setText('Display mode')
@@ -202,6 +211,7 @@ class main_widget(QWidget):
         Hlayout.addWidget(clear_log_button)
         Hlayout.addItem(H_Spacer)
         log_display_setting.setLayout(Hlayout)
+
         return log_display_setting
     def setupUI(self):
         self.Serial_RX_Thread = Serial_RX()
@@ -289,13 +299,39 @@ class main_window(QMainWindow):
         self.main_widget = main_widget(self,self.settings)
         self.setCentralWidget( self.main_widget)
 
+class plotter(QWidget):
+    def __init__(self):
+        QWidget.__init__(self)
+        self.setWindowTitle("Scope")
+        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
+        self.setupUI()
+
+    def setupUI(self):
+        V_main_layout = QVBoxLayout(self)
+        self.GLW = pg.GraphicsLayoutWidget()
+        V_main_layout.addWidget(self.GLW)
+        self.setLayout(V_main_layout)
+        self.plt = self.GLW.addPlot()
+        self.plt.setLabel('bottom', 'Time', 's')
+        self.plt.setLabel('left', 'Magnitude')
+        self.x = np.arange(0.0,10.0,0.01)
+        self.y = np.sin(self.x*2*np.pi/10.0)
+        self.plt.plot(self.x, self.y)
+        self.plt.showGrid(x=True, y=True)
+    def update(self):
+        self.plt.plot(self.x, self.y,clear=True)
+
+
+
+
 
 def main():
-
     app = QApplication(sys.argv)
     settings = QSettings('Meng\'s Lab', 'Serial Monitor')
     w = main_window(settings)
     w.show()
+    #s = plotter()
+    #s.show()
     #width = w.frameGeometry().width()
     #height = w.frameGeometry().height()
     #print(width,height)
