@@ -14,27 +14,20 @@
       <file leaf-file-name="Serial_monitor.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Serial_monitor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="534">
-              <caret line="253" column="18" lean-forward="false" selection-start-line="253" selection-start-column="18" selection-end-line="253" selection-end-column="18" />
+            <state relative-caret-position="2469">
+              <caret line="169" column="40" lean-forward="false" selection-start-line="169" selection-start-column="30" selection-end-line="169" selection-end-column="40" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
-                <element signature="e#2967#3281#0" expanded="false" />
-                <element signature="e#3310#4084#0" expanded="false" />
-                <element signature="e#4422#4502#0" expanded="false" />
-                <element signature="e#4558#4708#0" expanded="false" />
-                <element signature="e#4749#4897#0" expanded="false" />
-                <element signature="e#4937#5479#0" expanded="false" />
-                <element signature="e#5521#5603#0" expanded="false" />
-                <element signature="e#6025#6057#0" expanded="false" />
-                <element signature="e#6099#6724#0" expanded="false" />
-                <element signature="e#6760#7117#0" expanded="false" />
-                <element signature="e#7470#7870#0" expanded="false" />
-                <element signature="e#7932#9817#0" expanded="false" />
-                <element signature="e#9867#10056#0" expanded="false" />
-                <element signature="e#10197#12827#0" expanded="false" />
-                <element signature="e#12867#13842#0" expanded="false" />
-                <element signature="e#13875#14693#0" expanded="false" />
-                <element signature="e#14730#16159#0" expanded="false" />
+                <element signature="e#3204#3518#0" expanded="false" />
+                <element signature="e#4187#4337#0" expanded="false" />
+                <element signature="e#4378#4526#0" expanded="false" />
+                <element signature="e#6527#6884#0" expanded="false" />
+                <element signature="e#7693#8093#0" expanded="false" />
+                <element signature="e#8155#10040#0" expanded="false" />
+                <element signature="e#10090#10279#0" expanded="false" />
+                <element signature="e#10547#13177#0" expanded="false" />
+                <element signature="e#13217#14192#0" expanded="false" />
+                <element signature="e#14225#15043#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -58,6 +51,12 @@
       <find>connection_update</find>
       <find>connect</find>
       <find>.connect</find>
+      <find>layout</find>
+      <find>serial_log_update</find>
+      <find>Serial_signal</find>
+      <find>scope_update</find>
+      <find>serial_error_dialog</find>
+      <find>Scope_Enable_chk</find>
     </findStrings>
     <replaceStrings>
       <replace>main_Vlayout</replace>
@@ -187,7 +186,7 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24841438" sideWeight="0.50208336" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14270613" sideWeight="0.49791667" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.4154334" sideWeight="0.49791667" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -232,27 +231,20 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Serial_monitor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="534">
-          <caret line="253" column="18" lean-forward="false" selection-start-line="253" selection-start-column="18" selection-end-line="253" selection-end-column="18" />
+        <state relative-caret-position="2469">
+          <caret line="169" column="40" lean-forward="false" selection-start-line="169" selection-start-column="30" selection-end-line="169" selection-end-column="40" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
-            <element signature="e#2967#3281#0" expanded="false" />
-            <element signature="e#3310#4084#0" expanded="false" />
-            <element signature="e#4422#4502#0" expanded="false" />
-            <element signature="e#4558#4708#0" expanded="false" />
-            <element signature="e#4749#4897#0" expanded="false" />
-            <element signature="e#4937#5479#0" expanded="false" />
-            <element signature="e#5521#5603#0" expanded="false" />
-            <element signature="e#6025#6057#0" expanded="false" />
-            <element signature="e#6099#6724#0" expanded="false" />
-            <element signature="e#6760#7117#0" expanded="false" />
-            <element signature="e#7470#7870#0" expanded="false" />
-            <element signature="e#7932#9817#0" expanded="false" />
-            <element signature="e#9867#10056#0" expanded="false" />
-            <element signature="e#10197#12827#0" expanded="false" />
-            <element signature="e#12867#13842#0" expanded="false" />
-            <element signature="e#13875#14693#0" expanded="false" />
-            <element signature="e#14730#16159#0" expanded="false" />
+            <element signature="e#3204#3518#0" expanded="false" />
+            <element signature="e#4187#4337#0" expanded="false" />
+            <element signature="e#4378#4526#0" expanded="false" />
+            <element signature="e#6527#6884#0" expanded="false" />
+            <element signature="e#7693#8093#0" expanded="false" />
+            <element signature="e#8155#10040#0" expanded="false" />
+            <element signature="e#10090#10279#0" expanded="false" />
+            <element signature="e#10547#13177#0" expanded="false" />
+            <element signature="e#13217#14192#0" expanded="false" />
+            <element signature="e#14225#15043#0" expanded="false" />
           </folding>
         </state>
       </provider>

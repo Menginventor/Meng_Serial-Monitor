@@ -29,9 +29,9 @@ class Serial_RX(QtCore.QThread):
 
 
             if serial_port.is_open:
-                try:
-                    if self.parent.Scope_Enable_chk.isChecked():
-                        if self.parent.CSV_mode.isChecked():
+                if self.parent.Scope_Enable_chk.isChecked():
+                    if self.parent.CSV_mode.isChecked():
+                        try:
                             self.serial_buffer = serial_port.readline().decode("utf-8")
                             preprocess_str = self.serial_buffer
                             preprocess_str = preprocess_str.replace('\r','')
@@ -41,33 +41,43 @@ class Serial_RX(QtCore.QThread):
                             self.parent.x_plt_arr = np.append(self.parent.x_plt_arr,separate_val[0])
                             self.parent.y_plt_arr = np.append(self.parent.y_plt_arr, separate_val[1])
                             self.serial_display = self.serial_buffer
-                            self.Serial_signal.emit()
-                        elif self.parent.Protocol_mode.isChecked():
-                            pass
-                    else:
-                        if serial_port.inWaiting()>0:
+                            #self.Serial_signal.emit()
+                        except:
+                            print('read csv error')
+                            continue
 
-                            #print(delta_time)
+                        self.Serial_signal.emit()
+                    elif self.parent.Protocol_mode.isChecked():
+                        pass
+                else:
+                    if serial_port.inWaiting()>0:
+                        #print(delta_time)
+                        try:
                             bytesToRead = serial_port.inWaiting()
                             data = serial_port.read(bytesToRead)
-                            self.serial_buffer = ''
+                        except:
+                            print('read text error')
+                            continue
 
-                            #if self.mode == 'ASCII':
-                            if self.parent.ASCII_mode.isChecked():
-                                self.serial_buffer += data.decode("utf-8")
+                        self.serial_buffer = ''
 
-                            #elif(self.mode == 'HEX'):
-                            elif  self.parent.HEX_mode.isChecked():
-                                delta_time = (time.clock() - self.timer)
-                                self.timer = time.clock()
-                                if delta_time> 0.025:
-                                    self.serial_buffer += '\r\n'
-                                for b in data:
-                                    self.serial_buffer +=  ' '+format(b, '02x')+' '
-                            self.serial_display = self.serial_buffer
-                            self.Serial_signal.emit()
-                except:
-                    print('read error')
+                        #if self.mode == 'ASCII':
+                        if self.parent.ASCII_mode.isChecked():
+                            self.serial_buffer += data.decode("utf-8")
+
+                        #elif(self.mode == 'HEX'):
+                        elif  self.parent.HEX_mode.isChecked():
+                            delta_time = (time.clock() - self.timer)
+                            self.timer = time.clock()
+                            if delta_time> 0.025:
+                                self.serial_buffer += '\r\n'
+                            for b in data:
+                                self.serial_buffer +=  ' '+format(b, '02x')+' '
+                        self.serial_display = self.serial_buffer
+                        self.Serial_signal.emit()
+                        #self.Serial_signal.emit()
+
+
 class Serial_TX(QtCore.QThread):
     data_to_send = ''
     def __init__(self,data_to_send):
@@ -80,43 +90,28 @@ class Serial_TX(QtCore.QThread):
             serial_port.write(self.data_to_send.encode())
         except:
             print('send error')
-class plotter(QWidget):
-    x = np.array([])
-    y = np.array([])
-    def __init__(self):
-        QWidget.__init__(self)
-        self.setWindowTitle("Scope")
-        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
-        self.setupUI()
-
-    def setupUI(self):
-        V_main_layout = QVBoxLayout(self)
-        self.GLW = pg.GraphicsLayoutWidget()
-        V_main_layout.addWidget(self.GLW)
-        self.setLayout(V_main_layout)
-        self.plt = self.GLW.addPlot()
-        self.plt.setLabel('bottom', 'Time', 's')
-        self.plt.setLabel('left', 'Magnitude')
-        #self.x = np.arange(0.0,10.0,0.01)
-        #self.y = np.sin(self.x*2*np.pi/10.0)
-        #self.plt.plot(self.x, self.y)
-        #self.plt.showGrid(x=True, y=True)
-    def update(self):
-        self.plt.plot(self.x, self.y,clear=True)
-
 
 
 
 class main_widget(QWidget):
-    x_plt_arr =  np.array([])
-    y_plt_arr = np.array([])
-    win = pg.GraphicsWindow(title="Sample process")
-    win.resize(1000, 600)
-    win.setWindowTitle('pyqtgraph example')
-    plt = win.addPlot(title="Updating plot")
-    curve = plt.plot(pen='y')
+
+
     def __init__(self, parent,settings):
+        self.x_plt_arr = np.array([])
+        self.y_plt_arr = np.array([])
+        self.GL = pg.GraphicsLayoutWidget ()
+        self.win = QMainWindow()
+        self.win.resize(1000, 600)
+        self.win.setWindowTitle('pyqtgraph example')
+
+        self.win.setCentralWidget(self.GL)
+
+        self.plt = self.GL.addPlot(title="Updating plot")
+        self.plt.showGrid(x = True, y = True, alpha = 0.3)
+
+        self.curve = self.plt.plot(pen='y')
         self.settings = settings
+
         super().__init__(parent)
         self.setupUI()
     #Serial Group
@@ -150,15 +145,18 @@ class main_widget(QWidget):
     def serial_disconnect(self):
         serial_port.close()
         self.connection_update()
+        #self.scope_show_all_data()
         print('Disconnected')
     def serial_log_update(self):
         self.Serial_log.insertPlainText(self.Serial_RX_Thread.serial_display)
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
-        if self.Scope_Enable_chk.isChecked() and self.CSV_mode.isChecked():
-            print(len(self.x_plt_arr) ,len(self.y_plt_arr)  )
+        if self.Scope_Enable_chk.isChecked() and self.CSV_mode.isChecked() and self.win.isVisible():
+            #print(len(self.x_plt_arr) ,len(self.y_plt_arr)  )
             self.scope_update()
     def serial_log_clear(self):
         self.Serial_log.setPlainText('')
+        self.x_plt_arr = np.array([])
+        self.y_plt_arr = np.array([])
     def connection_update(self):
         Serial_Open = serial_port.is_open
         self.send_button.setEnabled(Serial_Open)
@@ -184,11 +182,23 @@ class main_widget(QWidget):
 
         self.text_for_send.setText('')
         pass
+    def scope_show_all_data(self):
+        self.curve.setData(self.x_plt_arr, self.y_plt_arr)
+        self.plt.enableAutoRange(x=True, y=True)
+        self.plt.setMouseEnabled(x=True, y=True)
+        QtGui.QApplication.processEvents()
+        print('scope_show_all_data')
+
     def scope_update(self):
-        plot_size = 1000
-        x_data = self.x_plt_arr[max(0,len(self.x_plt_arr)-plot_size):len(self.x_plt_arr)-1:]
-        y_data = self.y_plt_arr[max(0,len(self.y_plt_arr)-plot_size):len(self.y_plt_arr)-1:]
-        self.curve.setData(x_data,y_data)
+        if serial_port.is_open and self.win.isVisible():
+            plot_size = 1000
+            x_data = self.x_plt_arr[max(0,len(self.x_plt_arr)-plot_size):len(self.x_plt_arr)-1:]
+            y_data = self.y_plt_arr[max(0,len(self.y_plt_arr)-plot_size):len(self.y_plt_arr)-1:]
+            self.curve.setData(x_data,y_data)
+            self.plt.enableAutoRange(x=True, y=True)
+            self.plt.setMouseEnabled(x=False, y=False)
+
+
 
     #warning pop-up dialog
     def serial_error_dialog(self):
@@ -252,7 +262,11 @@ class main_widget(QWidget):
             self.Display_settings_Taps_Widget.setTabEnabled(1, False)
     def Open_Scope(self):#Event
         #pg.plot(self.x_plt_arr, self.y_plt_arr)
-        pass
+
+        if not self.win.isVisible():
+            self.win.show()
+            print('self.win.isVisible() = ' + str(self.win.isVisible()))
+
 
     def Display_settings_Taps(self):
         self.Display_settings_Taps_Widget = QTabWidget()
