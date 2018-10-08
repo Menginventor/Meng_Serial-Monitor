@@ -405,6 +405,35 @@ class main_window(QMainWindow):
         self.main_widget = main_widget(self,self.settings)
         self.setCentralWidget( self.main_widget)
 
+
+
+
+    def closeEvent(self, event):
+
+        if serial_port.is_open:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Information)
+
+            msg.setText("Are you sure you want to quit?")
+            msg.setInformativeText("Serial port still connected.")
+            msg.setWindowTitle("MessageBox demo")
+            msg.setWindowTitle("Warning message")
+
+            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+
+            retval = msg.exec_()
+            if retval == QMessageBox.Ok:
+                print('Exit conform')
+                app = QtGui.QApplication.instance()
+                app.closeAllWindows()
+            else:
+                event.ignore()
+
+        else:
+            app = QtGui.QApplication.instance()
+            app.closeAllWindows()
+
 def main():
     app = QApplication(sys.argv)
     settings = QSettings('Meng\'s Lab', 'Serial Monitor')
