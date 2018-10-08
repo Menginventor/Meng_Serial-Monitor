@@ -29,9 +29,9 @@ class Serial_RX(QtCore.QThread):
 
 
             if serial_port.is_open:
-                if self.parent.Scope_Enable_chk.isChecked():
-                    if self.parent.CSV_mode.isChecked():
-                        try:
+                try:
+                    if self.parent.Scope_Enable_chk.isChecked():
+                        if self.parent.CSV_mode.isChecked():
                             self.serial_buffer = serial_port.readline().decode("utf-8")
                             preprocess_str = self.serial_buffer
                             preprocess_str = preprocess_str.replace('\r','')
@@ -40,43 +40,33 @@ class Serial_RX(QtCore.QThread):
                             separate_val = [float(i) for i in separate_str]
                             print(separate_val)
                             self.serial_display = self.serial_buffer
-                            #self.Serial_signal.emit()
-                        except:
-                            print('read csv error')
-                            continue
+                            self.Serial_signal.emit()
+                        elif self.parent.Protocol_mode.isChecked():
+                            pass
+                    else:
+                        if serial_port.inWaiting()>0:
 
-                        self.Serial_signal.emit()
-                    elif self.parent.Protocol_mode.isChecked():
-                        pass
-                else:
-                    if serial_port.inWaiting()>0:
-                        #print(delta_time)
-                        try:
+                            #print(delta_time)
                             bytesToRead = serial_port.inWaiting()
                             data = serial_port.read(bytesToRead)
-                        except:
-                            print('read text error')
-                            continue
+                            self.serial_buffer = ''
 
-                        self.serial_buffer = ''
+                            #if self.mode == 'ASCII':
+                            if self.parent.ASCII_mode.isChecked():
+                                self.serial_buffer += data.decode("utf-8")
 
-                        #if self.mode == 'ASCII':
-                        if self.parent.ASCII_mode.isChecked():
-                            self.serial_buffer += data.decode("utf-8")
-
-                        #elif(self.mode == 'HEX'):
-                        elif  self.parent.HEX_mode.isChecked():
-                            delta_time = (time.clock() - self.timer)
-                            self.timer = time.clock()
-                            if delta_time> 0.025:
-                                self.serial_buffer += '\r\n'
-                            for b in data:
-                                self.serial_buffer +=  ' '+format(b, '02x')+' '
-                        self.serial_display = self.serial_buffer
-                        self.Serial_signal.emit()
-                        #self.Serial_signal.emit()
-
-
+                            #elif(self.mode == 'HEX'):
+                            elif  self.parent.HEX_mode.isChecked():
+                                delta_time = (time.clock() - self.timer)
+                                self.timer = time.clock()
+                                if delta_time> 0.025:
+                                    self.serial_buffer += '\r\n'
+                                for b in data:
+                                    self.serial_buffer +=  ' '+format(b, '02x')+' '
+                            self.serial_display = self.serial_buffer
+                            self.Serial_signal.emit()
+                except:
+                    print('read error')
 class Serial_TX(QtCore.QThread):
     data_to_send = ''
     def __init__(self,data_to_send):
@@ -89,34 +79,11 @@ class Serial_TX(QtCore.QThread):
             serial_port.write(self.data_to_send.encode())
         except:
             print('send error')
-<<<<<<< HEAD
-
-
-
-class main_widget(QWidget):
-
-
-=======
 class main_widget(QWidget):
     x_plt_arr =  np.array([])
     y_plt_arr = np.array([])
->>>>>>> parent of 9d797e2... finally add realtime plot
     def __init__(self, parent,settings):
-        self.x_plt_arr = np.array([])
-        self.y_plt_arr = np.array([])
-        self.GL = pg.GraphicsLayoutWidget ()
-        self.win = QMainWindow()
-        self.win.resize(1000, 600)
-        self.win.setWindowTitle('pyqtgraph example')
-
-        self.win.setCentralWidget(self.GL)
-
-        self.plt = self.GL.addPlot(title="Updating plot")
-        self.plt.showGrid(x = True, y = True, alpha = 0.3)
-
-        self.curve = self.plt.plot(pen='y')
         self.settings = settings
-
         super().__init__(parent)
         self.setupUI()
     def get_port_list(self):
@@ -149,21 +116,12 @@ class main_widget(QWidget):
     def serial_disconnect(self):
         serial_port.close()
         self.connection_update()
-        #self.scope_show_all_data()
         print('Disconnected')
     def serial_log_update(self):
         self.Serial_log.insertPlainText(self.Serial_RX_Thread.serial_display)
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
-<<<<<<< HEAD
-        if self.Scope_Enable_chk.isChecked() and self.CSV_mode.isChecked() and self.win.isVisible():
-            #print(len(self.x_plt_arr) ,len(self.y_plt_arr)  )
-            self.scope_update()
-=======
->>>>>>> parent of 9d797e2... finally add realtime plot
     def serial_log_clear(self):
         self.Serial_log.setPlainText('')
-        self.x_plt_arr = np.array([])
-        self.y_plt_arr = np.array([])
     def connection_update(self):
         Serial_Open = serial_port.is_open
         self.send_button.setEnabled(Serial_Open)
@@ -191,28 +149,6 @@ class main_widget(QWidget):
 
         self.text_for_send.setText('')
         pass
-<<<<<<< HEAD
-    def scope_show_all_data(self):
-        self.curve.setData(self.x_plt_arr, self.y_plt_arr)
-        self.plt.enableAutoRange(x=True, y=True)
-        self.plt.setMouseEnabled(x=True, y=True)
-        QtGui.QApplication.processEvents()
-        print('scope_show_all_data')
-
-    def scope_update(self):
-        if serial_port.is_open and self.win.isVisible():
-            plot_size = 1000
-            x_data = self.x_plt_arr[max(0,len(self.x_plt_arr)-plot_size):len(self.x_plt_arr)-1:]
-            y_data = self.y_plt_arr[max(0,len(self.y_plt_arr)-plot_size):len(self.y_plt_arr)-1:]
-            self.curve.setData(x_data,y_data)
-            self.plt.enableAutoRange(x=True, y=True)
-            self.plt.setMouseEnabled(x=False, y=False)
-
-
-
-    #warning pop-up dialog
-=======
->>>>>>> parent of 9d797e2... finally add realtime plot
     def serial_error_dialog(self):
         serial_error_msg = QMessageBox()
         serial_error_msg.setIcon(QMessageBox.Warning)
@@ -272,16 +208,6 @@ class main_widget(QWidget):
             self.Display_settings_Taps_Widget.setTabEnabled(1,True)
         else:
             self.Display_settings_Taps_Widget.setTabEnabled(1, False)
-<<<<<<< HEAD
-    def Open_Scope(self):#Event
-        #pg.plot(self.x_plt_arr, self.y_plt_arr)
-
-        if not self.win.isVisible():
-            self.win.show()
-            print('self.win.isVisible() = ' + str(self.win.isVisible()))
-
-=======
->>>>>>> parent of 9d797e2... finally add realtime plot
 
     def Display_settings_Taps(self):
         self.Display_settings_Taps_Widget = QTabWidget()
