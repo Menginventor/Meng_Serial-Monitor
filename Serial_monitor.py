@@ -16,6 +16,7 @@ serial_port =  serial.Serial()
 
 class Serial_RX(QtCore.QThread):
     Serial_signal = pyqtSignal()
+    Scope_signal = pyqtSignal()
     serial_display = ''
     serial_buffer = ''
     timer = time.clock()
@@ -26,8 +27,6 @@ class Serial_RX(QtCore.QThread):
         self.wait()
     def run(self):
         while True:
-
-
             if serial_port.is_open:
                 try:
                     if self.parent.Scope_Enable_chk.isChecked():
@@ -40,7 +39,10 @@ class Serial_RX(QtCore.QThread):
                             separate_val = [float(i) for i in separate_str]
                             print(separate_val)
                             self.serial_display = self.serial_buffer
+                            self.parent.x_plt_arr = np.append(self.parent.x_plt_arr, separate_val[0])
+                            self.parent.y_plt_arr = np.append(self.parent.y_plt_arr, separate_val[1])
                             self.Serial_signal.emit()
+                            self.Scope_signal.emit()
                         elif self.parent.Protocol_mode.isChecked():
                             pass
                     else:
@@ -86,6 +88,33 @@ class main_widget(QWidget):
         self.settings = settings
         super().__init__(parent)
         self.setupUI()
+        self.settup_scope()
+    def settup_scope(self):
+        self.GL = pg.GraphicsLayoutWidget()
+        self.scope_win = QMainWindow()
+        self.scope_win.resize(1000, 600)
+        self.scope_win.setWindowTitle('pyqtgraph example')
+        self.scope_win.setCentralWidget(self.GL)
+        self.plt = self.GL.addPlot(title="Updating plot")
+        self.plt.showGrid(x=True, y=True, alpha=0.3)
+        self.curve = self.plt.plot(pen='y')
+    def show_scope(self):
+        if not self.scope_win.isVisible():
+            self.scope_win.show()
+    def scope_update(self):
+        plot_size = 1000
+        x_data = self.x_plt_arr[max(0, len(self.x_plt_arr) - plot_size):len(self.x_plt_arr) - 1:]
+        y_data = self.y_plt_arr[max(0, len(self.y_plt_arr) - plot_size):len(self.y_plt_arr) - 1:]
+
+        self.plt.enableAutoRange(x=True, y=True)
+        self.plt.setMouseEnabled(x=False, y=False)
+        self.curve.setData(x_data, y_data)
+    def scope_show_all_data(self):
+        self.curve.setData(self.x_plt_arr, self.y_plt_arr)
+        self.plt.enableAutoRange(x=True, y=True)
+        self.plt.setMouseEnabled(x=True, y=True)
+        QtGui.QApplication.processEvents()
+        print('scope_show_all_data')
     def get_port_list(self):
         port_list = []
         for i in serial.tools.list_ports.comports(include_links=False):
@@ -113,13 +142,18 @@ class main_widget(QWidget):
         self.serial_log_clear()
         self.settings.setValue('last_connect_port', serial_port.port)
         self.settings.setValue('last_connect_baud', str(serial_port.baudrate))
+        if self.Scope_Enable_chk.isChecked():
+            self.show_scope()
     def serial_disconnect(self):
         serial_port.close()
         self.connection_update()
         print('Disconnected')
+        if self.Scope_Enable_chk.isChecked():
+            self.scope_show_all_data()
     def serial_log_update(self):
         self.Serial_log.insertPlainText(self.Serial_RX_Thread.serial_display)
         self.Serial_log.verticalScrollBar().setValue(self.Serial_log.verticalScrollBar().maximum())
+
     def serial_log_clear(self):
         self.Serial_log.setPlainText('')
     def connection_update(self):
@@ -135,8 +169,6 @@ class main_widget(QWidget):
         self.Scope_Enable_chk.setEnabled(not Serial_Open)
         self.CSV_mode.setEnabled(not Serial_Open)
         self.Protocol_mode.setEnabled(not Serial_Open)
-
-
     def serial_send(self):
         data_to_send = self.text_for_send.text()
         if self.CR.isChecked():
@@ -148,7 +180,6 @@ class main_widget(QWidget):
         print('send : ' + data_to_send)
 
         self.text_for_send.setText('')
-        pass
     def serial_error_dialog(self):
         serial_error_msg = QMessageBox()
         serial_error_msg.setIcon(QMessageBox.Warning)
@@ -243,34 +274,21 @@ class main_widget(QWidget):
         self.CSV_mode = QRadioButton("CSV")
         self.CSV_mode.setChecked(True)
         self.Protocol_mode = QRadioButton("Protocol")
+        open_scope_button = QPushButton('Open Scope', self)
+        open_scope_button.clicked.connect(self.show_scope)
         H_Spacer2 = QSpacerItem(10, 10, QSizePolicy.Expanding)
         Scope_Settings_Hlayout.addWidget(Data_Format_Label)
         Scope_Settings_Hlayout.addWidget(self.CSV_mode)
         Scope_Settings_Hlayout.addWidget(self.Protocol_mode)
+        Scope_Settings_Hlayout.addWidget(open_scope_button)
         Scope_Settings_Hlayout.addItem(H_Spacer2)
         Scope_settings_tab.setLayout(Scope_Settings_Hlayout)
         ############################################################################
         self.Display_settings_Taps_Widget.setFixedHeight(75)
 
         return self.Display_settings_Taps_Widget
-
-    def setupUI(self):
-
+    def Sending_console(self):
         Vlayout = QVBoxLayout(self)
-        ################################
-
-        Vlayout.addWidget(self.serial_setting_groupBox())
-
-        ################################
-        Vlayout.addWidget(self.Display_settings_Taps())
-
-        self.Serial_log = QPlainTextEdit()
-
-        self.Serial_log.setReadOnly(True)
-
-        Vlayout.addWidget(self.Serial_log)
-
-        ################################
         Hlayout_1 = QHBoxLayout(self)
         self.text_for_send = QLineEdit()
         self.send_button = QPushButton('Send', self)
@@ -287,25 +305,47 @@ class main_widget(QWidget):
         self.NL = QCheckBox("<NL>")
         H_Spacer2 = QSpacerItem(150, 10, QSizePolicy.Expanding)
 
-
         Hlayout_2.addWidget(l3)
         Hlayout_2.addWidget(self.CR)
         Hlayout_2.addWidget(self.NL)
         Hlayout_2.addItem(H_Spacer2)
         Vlayout.addLayout(Hlayout_2)
+        Sending_console_widget = QWidget()
+        Sending_console_widget.setLayout(Vlayout)
+        return Sending_console_widget
+    def setupUI(self):
+
+        main_Vlayout = QVBoxLayout(self)
+        ################################
+
+        main_Vlayout.addWidget(self.serial_setting_groupBox())
+
+        ################################
+        main_Vlayout.addWidget(self.Display_settings_Taps())
+
+        self.Serial_log = QPlainTextEdit()
+
+        self.Serial_log.setReadOnly(True)
+
+        main_Vlayout.addWidget(self.Serial_log)
+
+        ################################
+
+        main_Vlayout.addWidget(self.Sending_console())
+
         ################################
         self.connection_update()
-        self.setLayout(Vlayout)
+        self.setLayout(main_Vlayout)
         self.Scope_Enable_update()
 
         self.Serial_RX_Thread = Serial_RX(self)
         self.Serial_RX_Thread.start()
         self.Serial_RX_Thread.Serial_signal.connect(self.serial_log_update)
+        self.Serial_RX_Thread.Scope_signal.connect(self.scope_update)
+
 class main_window(QMainWindow):
     def __init__(self,settings ):
         self.settings = settings
-
-
         super(QMainWindow, self).__init__()
         #QMainWindow.__init__(self)
         self.initUI()
@@ -341,42 +381,11 @@ class main_window(QMainWindow):
         self.main_widget = main_widget(self,self.settings)
         self.setCentralWidget( self.main_widget)
 
-class plotter(QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
-        self.setWindowTitle("Scope")
-        self.setWindowIcon(QtGui.QIcon('py_logo.png'))
-        self.setupUI()
-
-    def setupUI(self):
-        V_main_layout = QVBoxLayout(self)
-        self.GLW = pg.GraphicsLayoutWidget()
-        V_main_layout.addWidget(self.GLW)
-        self.setLayout(V_main_layout)
-        self.plt = self.GLW.addPlot()
-        self.plt.setLabel('bottom', 'Time', 's')
-        self.plt.setLabel('left', 'Magnitude')
-        self.x = np.arange(0.0,10.0,0.01)
-        self.y = np.sin(self.x*2*np.pi/10.0)
-        self.plt.plot(self.x, self.y)
-        self.plt.showGrid(x=True, y=True)
-    def update(self):
-        self.plt.plot(self.x, self.y,clear=True)
-
-
-
-
-
 def main():
     app = QApplication(sys.argv)
     settings = QSettings('Meng\'s Lab', 'Serial Monitor')
     w = main_window(settings)
     w.show()
-    #s = plotter()
-    #s.show()
-    #width = w.frameGeometry().width()
-    #height = w.frameGeometry().height()
-    #print(width,height)
     exit(app.exec_())
 
 
