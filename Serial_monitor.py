@@ -28,24 +28,35 @@ class Serial_RX(QtCore.QThread):
     def run(self):
         while True:
             if serial_port.is_open:
-                try:
-                    if self.parent.Scope_Enable_chk.isChecked():
-                        if self.parent.CSV_mode.isChecked():
+
+                if self.parent.Scope_Enable_chk.isChecked():
+                    if self.parent.CSV_mode.isChecked():
+                        error = False
+                        try:
                             self.serial_buffer = serial_port.readline().decode("utf-8")
                             preprocess_str = self.serial_buffer
                             preprocess_str = preprocess_str.replace('\r','')
                             preprocess_str = preprocess_str.replace('\n', '')
                             separate_str = preprocess_str.split(',')
                             separate_val = [float(i) for i in separate_str]
-                            print(separate_val)
+                            #print(separate_val)
                             self.serial_display = self.serial_buffer
                             self.parent.x_plt_arr = np.append(self.parent.x_plt_arr, separate_val[0])
                             self.parent.y_plt_arr = np.append(self.parent.y_plt_arr, separate_val[1])
+
+
+                        except:
+                            print('Read CSV Error')
+                            error = True
+                        if not error:
                             self.Serial_signal.emit()
                             self.Scope_signal.emit()
-                        elif self.parent.Protocol_mode.isChecked():
-                            pass
-                    else:
+                    elif self.parent.Protocol_mode.isChecked():
+                        pass
+                else:
+                    error = False
+                    data_to_update = False
+                    try:
                         if serial_port.inWaiting()>0:
 
                             #print(delta_time)
@@ -66,9 +77,15 @@ class Serial_RX(QtCore.QThread):
                                 for b in data:
                                     self.serial_buffer +=  ' '+format(b, '02x')+' '
                             self.serial_display = self.serial_buffer
-                            self.Serial_signal.emit()
-                except:
-                    print('read error')
+                            data_to_update = True
+
+                    except:
+                        print('read error')
+                        error = True
+                    if not error and data_to_update:
+                        self.Serial_signal.emit()
+
+
 class Serial_TX(QtCore.QThread):
     data_to_send = ''
     def __init__(self,data_to_send):
@@ -103,12 +120,17 @@ class main_widget(QWidget):
             self.scope_win.show()
     def scope_update(self):
         plot_size = 1000
-        x_data = self.x_plt_arr[max(0, len(self.x_plt_arr) - plot_size):len(self.x_plt_arr) - 1:]
-        y_data = self.y_plt_arr[max(0, len(self.y_plt_arr) - plot_size):len(self.y_plt_arr) - 1:]
+        if serial_port.is_open:
+            try:
+                x_data = self.x_plt_arr[max(0, len(self.x_plt_arr) - plot_size):len(self.x_plt_arr) - 1:]
+                y_data = self.y_plt_arr[max(0, len(self.y_plt_arr) - plot_size):len(self.y_plt_arr) - 1:]
 
-        self.plt.enableAutoRange(x=True, y=True)
-        self.plt.setMouseEnabled(x=False, y=False)
-        self.curve.setData(x_data, y_data)
+                self.plt.enableAutoRange(x=True, y=True)
+                self.plt.setMouseEnabled(x=False, y=False)
+                self.curve.setData(x_data, y_data)
+            except:
+                print('plot error')
+
     def scope_show_all_data(self):
         self.curve.setData(self.x_plt_arr, self.y_plt_arr)
         self.plt.enableAutoRange(x=True, y=True)
@@ -156,6 +178,8 @@ class main_widget(QWidget):
 
     def serial_log_clear(self):
         self.Serial_log.setPlainText('')
+        self.x_plt_arr = np.array([])
+        self.y_plt_arr = np.array([])
     def connection_update(self):
         Serial_Open = serial_port.is_open
         self.send_button.setEnabled(Serial_Open)
