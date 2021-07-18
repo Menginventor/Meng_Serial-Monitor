@@ -19,7 +19,7 @@ class Serial_RX(QtCore.QThread):
     Scope_signal = pyqtSignal()
     serial_display = ''
     serial_buffer = ''
-    timer = time.clock()
+    timer = time.process_time()
     def __init__(self,parent):
         QtCore.QThread.__init__(self)
         self.parent = parent
